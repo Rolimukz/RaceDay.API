@@ -1,0 +1,63 @@
+﻿@model IEnumerable<RaceDay.Web.Models.EnrolmentViewModel>
+@{
+    ViewData["Title"] = "My Enrolments";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">My Enrolled Events</h2>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Event</th>
+                        <th>Date</th>
+                        <th>Category</th>
+                        <th>Bib Number</th>
+                        <th>Status</th>
+                        <th>Payment</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var en in Model)
+                    {
+                        <tr>
+                            <td>@en.Event?.EventName</td>
+                            <td>@en.Event?.EventDate.ToString("dd MMM yyyy")</td>
+                            <td>@en.Category?.CategoryName (@en.Category?.Distance km)</td>
+                            <td><strong>@en.BibNumber</strong></td>
+                            <td>
+                                @if (en.Status == "Confirmed")
+                                {
+                                    <span class="badge bg-success">Confirmed</span>
+                                }
+                                else if (en.Status == "Registered")
+                                {
+
+                                    <span class="badge bg-warning text-dark">Registered</span>
+                                }
+                                else
+                                {
+
+                                    <span class="badge bg-secondary">@en.Status</span>
+                                }
+                            </td>
+                            <td>
+                                @if (en.PaymentStatus == "Paid")
+                                {
+                                    <span class="badge bg-success">Paid</span>
+                                }
+                                else
+                                {
+
+                                    <span class="badge bg-danger">@en.PaymentStatus</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

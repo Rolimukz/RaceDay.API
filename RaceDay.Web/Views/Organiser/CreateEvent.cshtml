@@ -1,0 +1,81 @@
+﻿@model RaceDay.Web.Models.CreateEventViewModel
+@{
+    ViewData["Title"] = "Create Event";
+}
+
+<div class="row justify-content-center mt-4">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Create New Event</h4>
+            </div>
+            <div class="card-body">
+                <!-- CRITICAL: enctype must be multipart/form-data for file uploads -->
+                <form asp-action="CreateEvent" method="post" enctype="multipart/form-data">
+                    <div asp-validation-summary="All" class="text-danger"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="EventName" class="form-label">Event Name</label>
+                        <input asp-for="EventName" class="form-control" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label">Description</label>
+                        <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                    </div>
+
+                    <!-- FILE INPUT FOR AZURE BLOB -->
+                    <div class="mb-3">
+                        <label asp-for="BannerImage" class="form-label">Event Banner Image</label>
+                        <input asp-for="BannerImage" type="file" class="form-control" accept="image/*" />
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="EventDate" class="form-label">Date & Time</label>
+                            <input asp-for="EventDate" type="datetime-local" class="form-control" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Venue" class="form-label">Venue</label>
+                            <input asp-for="Venue" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="City" class="form-label">City</label>
+                            <input asp-for="City" class="form-control" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Province" class="form-label">Province</label>
+                            <input asp-for="Province" class="form-control" required />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="EntryFee" class="form-label">Entry Fee (R)</label>
+                            <input asp-for="EntryFee" type="number" step="0.01" class="form-control" required />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="MaxParticipants" class="form-label">Max Participants</label>
+                            <input asp-for="MaxParticipants" type="number" class="form-control" required />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="Status" class="form-label">Status</label>
+                            <select asp-for="Status" class="form-select">
+                                <option value="Draft">Draft</option>
+                                <option value="Open">Open</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-3">
+                        <a asp-action="Index" class="btn btn-secondary">Back to Dashboard</a>
+                        <button type="submit" class="btn btn-success">Create Event</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

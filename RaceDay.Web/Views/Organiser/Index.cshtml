@@ -1,0 +1,54 @@
+﻿@model IEnumerable<RaceDay.Web.Models.EventViewModel>
+@{ ViewData["Title"] = "Organiser Dashboard"; }
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Organiser Dashboard</h2>
+    <a asp-action="CreateEvent" class="btn btn-success">+ Create New Event</a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>Event Name</th>
+                    <th>Date</th>
+                    <th>Location</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var ev in Model)
+                    {
+                        <tr>
+                            <td class="fw-bold">@ev.EventName</td>
+                            <td>@ev.EventDate.ToString("yyyy-MM-dd")</td>
+                            <td>@ev.City, @ev.Province</td>
+                            <td>
+                                @if(ev.Status == "Open") { <span class="badge bg-success">Open</span> }
+                                else { <span class="badge bg-warning text-dark">@ev.Status</span> }
+                            </td>
+                            <td>
+                                <a asp-action="CreateEvent" class="btn btn-sm btn-primary">Create Event</a>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">No events created yet. Click "+ Create New Event" to start.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

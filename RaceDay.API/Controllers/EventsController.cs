@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using RaceDayAPI.Data;
 using RaceDayAPI.DTOs;
 using RaceDayAPI.Models;
+using RaceDayAPI.Services;
 using System.Security.Claims;
 
 namespace RaceDayAPI.Controllers
@@ -13,10 +14,12 @@ namespace RaceDayAPI.Controllers
     public class EventsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly BlobService _blobService;
 
-        public EventsController(ApplicationDbContext context)
+        public EventsController(ApplicationDbContext context, BlobService blobService)
         {
             _context = context;
+            _blobService = blobService;
         }
 
         // GET: api/events (Public)
@@ -47,6 +50,7 @@ namespace RaceDayAPI.Controllers
                 e.EntryFee,
                 e.MaxParticipants,
                 e.Status,
+                e.BannerUrl, // Added banner URL
                 Organiser = e.Organiser != null ? $"{e.Organiser.FirstName} {e.Organiser.LastName}" : null,
                 TotalCategories = e.Categories != null ? e.Categories.Count : 0
             }).ToListAsync();
@@ -69,7 +73,8 @@ namespace RaceDayAPI.Controllers
                     e.City,
                     e.Province,
                     e.EntryFee,
-                    e.Status
+                    e.Status,
+                    e.BannerUrl
                 })
                 .ToListAsync();
 
@@ -90,7 +95,8 @@ namespace RaceDayAPI.Controllers
                     e.EventDate,
                     e.City,
                     e.Province,
-                    e.Status
+                    e.Status,
+                    e.BannerUrl
                 })
                 .ToListAsync();
 
@@ -120,7 +126,8 @@ namespace RaceDayAPI.Controllers
                 e.City,
                 e.Province,
                 e.EntryFee,
-                e.Status
+                e.Status,
+                e.BannerUrl
             }).ToListAsync();
 
             return Ok(events);
@@ -151,6 +158,7 @@ namespace RaceDayAPI.Controllers
                 eventItem.EntryFee,
                 eventItem.MaxParticipants,
                 eventItem.Status,
+                eventItem.BannerUrl, // Added banner URL
                 Organiser = eventItem.Organiser != null ? new
                 {
                     eventItem.Organiser.UserID,
@@ -185,11 +193,18 @@ namespace RaceDayAPI.Controllers
         // POST: api/events (Organiser only)
         [HttpPost]
         [Authorize(Roles = "Organiser,Admin")]
-        public async Task<IActionResult> CreateEvent([FromBody] CreateEventDto request)
+        public async Task<IActionResult> CreateEvent([FromForm] CreateEventDto request, IFormFile? BannerImage)
         {
             var userId = GetCurrentUserId();
             if (userId == null)
                 return Unauthorized();
+
+            // Upload image to Azure Blob if provided
+            string? imageUrl = null;
+            if (BannerImage != null && BannerImage.Length > 0)
+            {
+                imageUrl = await _blobService.UploadFileAsync(BannerImage);
+            }
 
             var eventItem = new Event
             {
@@ -203,6 +218,7 @@ namespace RaceDayAPI.Controllers
                 EntryFee = request.EntryFee,
                 MaxParticipants = request.MaxParticipants,
                 Status = request.Status ?? "Draft",
+                BannerUrl = imageUrl,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -218,6 +234,7 @@ namespace RaceDayAPI.Controllers
                 eventItem.City,
                 eventItem.Province,
                 eventItem.Status,
+                eventItem.BannerUrl,
                 message = "Event created successfully"
             });
         }
@@ -235,7 +252,6 @@ namespace RaceDayAPI.Controllers
             if (eventItem == null)
                 return NotFound(new { message = "Event not found" });
 
-            // Check if user is the organiser or admin
             var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
             if (eventItem.OrganiserID != userId && userRole != "Admin")
                 return Forbid();
@@ -403,7 +419,7 @@ namespace RaceDayAPI.Controllers
                 eventRoute = new EventRoute
                 {
                     EventID = id,
-                    RouteName = request.RouteName,
+                    RouteName = request.RouteName ?? "Default Route",
                     StartPoint = request.StartPoint,
                     EndPoint = request.EndPoint,
                     Distance = request.Distance,
