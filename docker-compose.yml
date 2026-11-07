@@ -1,0 +1,6 @@
+services:
+  raceday.api:
+    image: ${DOCKER_REGISTRY-}racedayapi
+    build:
+      context: .
+      dockerfile: RaceDay.API/Dockerfile
